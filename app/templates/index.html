@@ -24,7 +24,7 @@
                 <h2>Upload Image</h2>
                 
                 <div class="upload-controls">
-                    <input type="file" id="image-input" accept="image/*" style="display: none;">
+                    <input type="file" id="image-input" accept="image/*" class="hidden-input">
                     <button class="btn btn-upload" onclick="document.getElementById('image-input').click()">
                         Choose Image
                     </button>
@@ -71,7 +71,7 @@
         // Handle text extraction
         extractBtn.addEventListener('click', async function() {
             if (!selectedFile) {
-                alert('Please select an image first');
+                extractedText.innerHTML = '<p class="error">Please select an image first</p>';
                 return;
             }
 

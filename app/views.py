@@ -79,11 +79,10 @@ def extract_text_from_image(image_path):
         custom_config = r'--oem 3 --psm 6'
         text = pytesseract.image_to_string(processed_image, config=custom_config)
         
-        # Clean up text - remove special characters
-        characters_to_remove = "!@#$%^*()+-;/[]{}&*^~_`"
-        cleaned_text = text
-        for character in characters_to_remove:
-            cleaned_text = cleaned_text.replace(character, "")
+        # Clean up text - remove special characters using translation table for efficiency
+        characters_to_remove = "!@#$%^*()+-;/[]{}&^~_`"
+        translation_table = str.maketrans('', '', characters_to_remove)
+        cleaned_text = text.translate(translation_table)
         
         return cleaned_text.strip() if cleaned_text.strip() else "No text detected in image"
         
@@ -107,9 +106,6 @@ def extract():
         return jsonify({'error': 'No file selected'}), 400
     
     if file and allowed_file(file.filename):
-        # Create uploads directory if it doesn't exist
-        os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-        
         # Save file securely
         filename = secure_filename(file.filename)
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
