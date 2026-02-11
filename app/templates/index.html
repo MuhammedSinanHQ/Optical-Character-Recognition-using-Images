@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optical Character Recognition App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Optical Character Recognition App</h1>
+        
+        <div class="main-content">
+            <!-- Left side - Extracted Text -->
+            <div class="text-section">
+                <h2>Extracted Text</h2>
+                <div class="text-display" id="extracted-text">
+                    <p class="placeholder">Upload an image and click Extract to see the text here...</p>
+                </div>
+            </div>
+            
+            <!-- Right side - Image Upload and Preview -->
+            <div class="image-section">
+                <h2>Upload Image</h2>
+                
+                <div class="upload-controls">
+                    <input type="file" id="image-input" accept="image/*" style="display: none;">
+                    <button class="btn btn-upload" onclick="document.getElementById('image-input').click()">
+                        Choose Image
+                    </button>
+                    <button class="btn btn-extract" id="extract-btn" disabled>
+                        Extract Text
+                    </button>
+                </div>
+                
+                <div class="image-preview" id="image-preview">
+                    <p class="placeholder">No image selected</p>
+                </div>
+                
+                <div id="loading" class="loading" style="display: none;">
+                    <p>Processing image...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const imageInput = document.getElementById('image-input');
+        const imagePreview = document.getElementById('image-preview');
+        const extractBtn = document.getElementById('extract-btn');
+        const extractedText = document.getElementById('extracted-text');
+        const loading = document.getElementById('loading');
+        let selectedFile = null;
+
+        // Handle image selection
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                selectedFile = file;
+                const reader = new FileReader();
+                
+                reader.onload = function(event) {
+                    imagePreview.innerHTML = `<img src="${event.target.result}" alt="Preview">`;
+                    extractBtn.disabled = false;
+                };
+                
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Handle text extraction
+        extractBtn.addEventListener('click', async function() {
+            if (!selectedFile) {
+                alert('Please select an image first');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image', selectedFile);
+
+            loading.style.display = 'block';
+            extractBtn.disabled = true;
+            extractedText.innerHTML = '<p class="placeholder">Processing...</p>';
+
+            try {
+                const response = await fetch('/extract', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    extractedText.innerHTML = `<pre>${data.text}</pre>`;
+                } else {
+                    extractedText.innerHTML = `<p class="error">${data.error}</p>`;
+                }
+            } catch (error) {
+                extractedText.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+            } finally {
+                loading.style.display = 'none';
+                extractBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
