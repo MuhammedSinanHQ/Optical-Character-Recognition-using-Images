@@ -71,6 +71,13 @@ pip install -r requirements.txt
 python app.py
 ```
 
+For development with debug mode enabled:
+```bash
+FLASK_DEBUG=true python app.py
+```
+
+**Note:** Debug mode should only be enabled in development environments, never in production.
+
 2. **Open your web browser and navigate to:**
 ```
 http://localhost:5000
